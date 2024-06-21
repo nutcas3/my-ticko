@@ -81,3 +81,36 @@ func (pgdb *PostgresqlDB) GetUserById(id int) (*model.UserWithRoleList, error) {
 	userWithRole.ID = id
 	return userWithRole, nil
 }
+
+func (pgdb *PostgresqlDB) GetUserByName(name string) (*model.UserWithRoleList, error) {
+	userWithRole := &model.UserWithRoleList{}
+	rows, err := pgdb.DB.Query(context.Background(), `
+		select u.id as uid ,u.username, r.role from users u
+		inner join user_roles ur on ur.user_id = u.id
+		inner join roles r on r.id = ur.role_id
+		where u.username = $1
+		`, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var role string
+		var id int
+		err = rows.Scan(&id, nil, &role)
+		if err != nil {
+			return nil, err
+		}
+		userWithRole.RoleList = append(userWithRole.RoleList, role)
+		userWithRole.ID = id
+	}
+	userWithRole.Username = name
+	if len(userWithRole.RoleList) == 0 {
+		return nil, &customError.UserError{
+			Code:           customError.UserNotFound,
+			Message:        "User not found",
+			HTTPStatusCode: http.StatusBadRequest,
+		}
+	}
+	return userWithRole, nil
+}
