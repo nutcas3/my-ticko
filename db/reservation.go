@@ -50,4 +50,24 @@ func (pgdb *PostgresqlDB) MakeReservationBatch(jobs []*model.ReservationRequest,
 	return results, nil
 }
 
-
+func (pgdb *PostgresqlDB) ViewAllReservations(userID int) ([]*model.ReservationDetail, error) {
+	var reservations []*model.ReservationDetail
+	rows, err := pgdb.DB.Query(context.Background(),
+		`SELECT r.*, e.name, e.owner from reservations r
+			JOIN events e on (e.id = r.event_id)
+			WHERE user_id=$1
+			ORDER BY id ASC`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var reservation model.ReservationDetail
+		err = rows.Scan(&reservation.ReservationID, &reservation.UserID, &reservation.EventID, &reservation.Tickets, nil, &reservation.EventName, &reservation.OrganizerID)
+		if err != nil {
+			return nil, err
+		}
+		reservations = append(reservations, &reservation)
+	}
+	return reservations, nil
+}
