@@ -55,3 +55,29 @@ func (pgdb *PostgresqlDB) CreateUser(username string, role model.Role) (int, err
 	}
 	return userID, nil
 }
+
+func (pgdb *PostgresqlDB) GetUserById(id int) (*model.UserWithRoleList, error) {
+	userWithRole := &model.UserWithRoleList{}
+	rows, err := pgdb.DB.Query(context.Background(), `
+		select u.id as uid ,u.username, r.role from users u
+		inner join user_roles ur on ur.user_id = u.id
+		inner join roles r on r.id = ur.role_id
+		where u.id = $1
+		`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var role string
+		var username string
+		err = rows.Scan(nil, &username, &role)
+		if err != nil {
+			return nil, err
+		}
+		userWithRole.RoleList = append(userWithRole.RoleList, role)
+		userWithRole.Username = username
+	}
+	userWithRole.ID = id
+	return userWithRole, nil
+}
