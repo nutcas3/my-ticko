@@ -71,3 +71,46 @@ func (pgdb *PostgresqlDB) ViewAllReservations(userID int) ([]*model.ReservationD
 	}
 	return reservations, nil
 }
+
+func (pgdb *PostgresqlDB) CancelReservationBatch(userID int, reservationIDs []int) ([]*model.DeletedTicket, map[int]int, error) {
+	tx, err := pgdb.DB.BeginTx(context.Background(), pgx.TxOptions{
+		IsoLevel: pgx.RepeatableRead,
+	})
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Unable to make a transaction")
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			_ = tx.Rollback(context.Background())
+		}
+		_ = tx.Rollback(context.Background())
+
+	}()
+	var sql = `DELETE from reservations where id=$1 and user_id=$2 RETURNING event_id, quota`
+	var deletedQuota int
+	var eventID int
+	var deletedTickets []*model.DeletedTicket
+	var quotaToReclaim = make(map[int]int)
+	for _, id := range reservationIDs {
+		err = tx.QueryRow(context.Background(), sql, id, userID).Scan(&eventID, &deletedQuota)
+		if err != nil {
+			if err == pgx.ErrNoRows {
+				continue
+			}
+			return nil, nil, err
+		}
+		deletedTickets = append(deletedTickets, &model.DeletedTicket{
+			ReservationID: id,
+			EventID:       eventID,
+			Amount:        deletedQuota,
+		})
+		quotaToReclaim[eventID] += deletedQuota
+	}
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Unable to commit a transaction")
+	}
+
+	return deletedTickets, quotaToReclaim, nil
+}
+
