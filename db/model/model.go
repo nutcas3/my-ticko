@@ -19,7 +19,7 @@ type EventDetail struct {
 	RemainingQuota int    `json:"remainingQuota"`
 }
 
-type ReservationDetails struct {
+type ReservationDetail struct {
 	ReservationID int    `json:"reservationID"`
 	EventID       int    `json:"eventID"`
 	EventName     string `json:"eventName"`
