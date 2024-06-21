@@ -42,9 +42,6 @@ func New(config *Config, logger log.Logger) (pgdb *PostgresqlDB, err error) {
 	//db, err = pgx.Connect(context.Background(), connStr)
 	var connectConf, _ = pgxpool.ParseConfig(connStr)
 	connectConf.MaxConns = config.MaxOpenConns
-	//connectConf.MaxConnLifetime = 300 * time.Second // use defaults until we have benchmarked this further
-	//connectConf.HealthCheckPeriod = 300 * time.Second
-	//connectConf.ConnConfig.PreferSimpleProtocol = true // don't wrap queries into transactions
 	connectConf.ConnConfig.Logger = NewDatabaseLogger(&pgdb.logger)
 	connectConf.ConnConfig.LogLevel = pgx.LogLevelWarn
 	pgdb.DB, err = pgxpool.ConnectConfig(context.Background(), connectConf)
