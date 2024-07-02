@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
+	customError "github.com/nutcas3/my-ticko/custom_error"
 	"github.com/pkg/errors"
 	"net/http"
-	customError	"github.com/nutcas3/my-ticko/custom_error"
 
 	"github.com/nutcas3/my-ticko/db/model"
 )

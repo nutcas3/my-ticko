@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/pkg/errors"
 	"github.com/nutcas3/my-ticko/db/model"
+	"github.com/pkg/errors"
 )
 
 type DBReservationInterface interface {
@@ -12,7 +12,6 @@ type DBReservationInterface interface {
 	CancelReservationBatch(userID int, reservationIDs []int) ([]*model.DeletedTicket, map[int]int, error)
 	MakeReservationBatch(jobs []*model.ReservationRequest, remainingQuotaMap map[int]int) ([]*model.ReservationTicket, error)
 }
-
 
 func (pgdb *PostgresqlDB) MakeReservationBatch(jobs []*model.ReservationRequest, remainingQuotaMap map[int]int) ([]*model.ReservationTicket, error) {
 	var results []*model.ReservationTicket
@@ -113,4 +112,3 @@ func (pgdb *PostgresqlDB) CancelReservationBatch(userID int, reservationIDs []in
 
 	return deletedTickets, quotaToReclaim, nil
 }
-

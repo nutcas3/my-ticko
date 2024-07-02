@@ -2,6 +2,6 @@ package main
 
 import "github.com/nutcas3/my-ticko/cmd"
 
-func main()  {
+func main() {
 	cmd.Execute()
 }

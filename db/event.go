@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"github.com/pkg/errors"
 	"github.com/nutcas3/my-ticko/db/model"
+	"github.com/pkg/errors"
 )
-
 
 type DBEventInterface interface {
 	CreateEvent(ownerId int, eventName string, quota int) (int, error)

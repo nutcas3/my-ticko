@@ -6,8 +6,8 @@ type Fields map[string]interface{}
 
 const (
 	Debug = "debug"
-	Info = "info"
-	Warn = "warn"
+	Info  = "info"
+	Warn  = "warn"
 	Error = "error"
 	Fatal = "fatal"
 )
@@ -21,7 +21,7 @@ var (
 	errInvalidLoggerInstance = errors.New("Invalid logger instance")
 )
 
-//Logger is our contract for the logger
+// Logger is our contract for the logger
 type Logger interface {
 	Debugf(format string, args ...interface{})
 
@@ -49,7 +49,7 @@ type Configuration struct {
 	Color             bool
 }
 
-//NewLogger returns an instance of logger
+// NewLogger returns an instance of logger
 func NewLogger(config *Configuration, loggerInstance int) (Logger, error) {
 	if config == nil {
 		config = &Configuration{
@@ -57,7 +57,7 @@ func NewLogger(config *Configuration, loggerInstance int) (Logger, error) {
 			ConsoleLevel:      "debug",
 			ConsoleJSONFormat: false,
 			EnableFile:        false,
-			Color: true,
+			Color:             true,
 		}
 	}
 
